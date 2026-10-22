@@ -1,0 +1,518 @@
+{
+ "op_counts": {
+  "delegation": {
+   "CS": {
+    "hmac": 17,
+    "xor": 4
+   },
+   "MF": {
+    "hmac": 4,
+    "xor": 1
+   },
+   "ET": {
+    "hmac": 10,
+    "xor": 1
+   },
+   "SP": {
+    "hmac": 11,
+    "xor": 2
+   },
+   "total": {
+    "hmac": 42,
+    "xor": 8
+   }
+  },
+  "access": {
+   "CS": {
+    "hmac": 0,
+    "xor": 0
+   },
+   "MF": {
+    "hmac": 0,
+    "xor": 0
+   },
+   "ET": {
+    "hmac": 5,
+    "xor": 0
+   },
+   "SP": {
+    "hmac": 5,
+    "xor": 0
+   },
+   "total": {
+    "hmac": 10,
+    "xor": 0
+   }
+  },
+  "revocation": {
+   "CS": {
+    "hmac": 7,
+    "xor": 1
+   },
+   "MF": {
+    "hmac": 3,
+    "xor": 1
+   },
+   "ET": {
+    "hmac": 4,
+    "xor": 0
+   },
+   "SP": {
+    "hmac": 0,
+    "xor": 0
+   },
+   "total": {
+    "hmac": 14,
+    "xor": 2
+   }
+  },
+  "delegation_cs_worst_resync": {
+   "CS": {
+    "hmac": 21,
+    "xor": 4
+   }
+  }
+ },
+ "message_sizes": {
+  "delegation": {
+   "messages": [
+    {
+     "msg": "M1",
+     "fields": [
+      "id_MF",
+      "ctr",
+      "T",
+      "X",
+      "a1"
+     ],
+     "native": 608,
+     "uniform": 832
+    },
+    {
+     "msg": "M2",
+     "fields": [],
+     "native": 0,
+     "uniform": 0
+    },
+    {
+     "msg": "M3",
+     "fields": [
+      "nE",
+      "kappa"
+     ],
+     "native": 256,
+     "uniform": 416
+    },
+    {
+     "msg": "M4",
+     "fields": [
+      "id_SP",
+      "nS",
+      "nE",
+      "kappa",
+      "Y",
+      "b1"
+     ],
+     "native": 768,
+     "uniform": 1152
+    },
+    {
+     "msg": "M5",
+     "fields": [
+      "nC",
+      "ES",
+      "tauS",
+      "EE",
+      "tauE"
+     ],
+     "native": 1088,
+     "uniform": 1408
+    },
+    {
+     "msg": "M6",
+     "fields": [
+      "nC",
+      "EE",
+      "tauE",
+      "nS",
+      "sig1"
+     ],
+     "native": 928,
+     "uniform": 1280
+    },
+    {
+     "msg": "M7",
+     "fields": [
+      "sig2",
+      "rho"
+     ],
+     "native": 256,
+     "uniform": 512
+    },
+    {
+     "msg": "M8",
+     "fields": [
+      "nC",
+      "rho",
+      "b2"
+     ],
+     "native": 384,
+     "uniform": 672
+    },
+    {
+     "msg": "M9",
+     "fields": [
+      "ctr",
+      "st",
+      "a2"
+     ],
+     "native": 168,
+     "uniform": 296
+    }
+   ],
+   "total_native": 4456,
+   "total_uniform": 6568,
+   "n_messages": 9,
+   "air_native": 1440
+  },
+  "access": {
+   "messages": [
+    {
+     "msg": "A1",
+     "fields": [],
+     "native": 0,
+     "uniform": 0
+    },
+    {
+     "msg": "A2",
+     "fields": [
+      "mE",
+      "kappa"
+     ],
+     "native": 256,
+     "uniform": 416
+    },
+    {
+     "msg": "A3",
+     "fields": [
+      "mS",
+      "sig1"
+     ],
+     "native": 256,
+     "uniform": 416
+    },
+    {
+     "msg": "A4",
+     "fields": [
+      "sig2"
+     ],
+     "native": 128,
+     "uniform": 256
+    }
+   ],
+   "total_native": 640,
+   "total_uniform": 1088,
+   "n_messages": 4,
+   "air_native": 640
+  },
+  "revocation": {
+   "messages": [
+    {
+     "msg": "R0",
+     "fields": [
+      "id_MF",
+      "ctr",
+      "T",
+      "X",
+      "a"
+     ],
+     "native": 448,
+     "uniform": 640
+    },
+    {
+     "msg": "R1",
+     "fields": [],
+     "native": 0,
+     "uniform": 0
+    },
+    {
+     "msg": "R2",
+     "fields": [
+      "nE",
+      "kappa"
+     ],
+     "native": 256,
+     "uniform": 416
+    },
+    {
+     "msg": "R3",
+     "fields": [
+      "nC2",
+      "RTag"
+     ],
+     "native": 256,
+     "uniform": 416
+    },
+    {
+     "msg": "R4",
+     "fields": [
+      "Rack"
+     ],
+     "native": 128,
+     "uniform": 256
+    },
+    {
+     "msg": "R5",
+     "fields": [
+      "ctr",
+      "st",
+      "a3"
+     ],
+     "native": 168,
+     "uniform": 296
+    }
+   ],
+   "total_native": 1256,
+   "total_uniform": 2024,
+   "n_messages": 6,
+   "air_native": 640
+  }
+ },
+ "storage_bits": {
+  "ET": {
+   "id_ET": 128,
+   "k_ET": 256,
+   "s_j": 256,
+   "id_SP": 128,
+   "pol": 32,
+   "j": 16,
+   "pending_challenge": 128,
+   "mode_flag": 8
+  },
+  "SP_base": {
+   "id_SP": 128,
+   "k_SP": 256
+  },
+  "SP_per_tag": {
+   "id_ET": 128,
+   "s_j": 256,
+   "pol": 32
+  },
+  "MF": {
+   "id_MF": 128,
+   "k_MF": 256,
+   "ctr": 32
+  },
+  "CS_per_MF": {
+   "id_MF": 128,
+   "k_MF": 256,
+   "last_ctr": 32
+  },
+  "CS_per_SP": {
+   "id_SP": 128,
+   "k_SP": 256
+  },
+  "CS_per_ET": {
+   "id_ET": 128,
+   "k_ET": 256,
+   "owner": 128
+  },
+  "CS_per_active_delegation": {
+   "id_SP": 128,
+   "id_MF": 128,
+   "pol": 32,
+   "status": 8
+  },
+  "CS_per_inflight_session": {
+   "n_C": 128,
+   "s": 256,
+   "n_E": 128,
+   "id_ET": 128,
+   "id_SP": 128,
+   "ctr": 32,
+   "pol": 32
+  }
+ },
+ "storage_totals": {
+  "ET": 952,
+  "SP_base": 384,
+  "SP_per_tag": 416,
+  "MF": 416,
+  "CS_per_MF": 416,
+  "CS_per_SP": 384,
+  "CS_per_ET": 512,
+  "CS_per_active_delegation": 296,
+  "CS_per_inflight_session": 832
+ },
+ "tag_hardware": {
+  "delegation": {
+   "hmac_calls": 10,
+   "compressions_nocache": 41,
+   "compressions_cached": 27,
+   "latency_ms": {
+    "100": {
+     "nocache": 462.48,
+     "cached": 304.56
+    },
+    "1000": {
+     "nocache": 46.25,
+     "cached": 30.46
+    },
+    "4000": {
+     "nocache": 11.56,
+     "cached": 7.61
+    },
+    "13560": {
+     "nocache": 3.41,
+     "cached": 2.25
+    }
+   }
+  },
+  "access": {
+   "hmac_calls": 5,
+   "compressions_nocache": 20,
+   "compressions_cached": 12,
+   "latency_ms": {
+    "100": {
+     "nocache": 225.6,
+     "cached": 135.36
+    },
+    "1000": {
+     "nocache": 22.56,
+     "cached": 13.54
+    },
+    "4000": {
+     "nocache": 5.64,
+     "cached": 3.38
+    },
+    "13560": {
+     "nocache": 1.66,
+     "cached": 1.0
+    }
+   }
+  },
+  "revocation": {
+   "hmac_calls": 4,
+   "compressions_nocache": 16,
+   "compressions_cached": 12,
+   "latency_ms": {
+    "100": {
+     "nocache": 180.48,
+     "cached": 135.36
+    },
+    "1000": {
+     "nocache": 18.05,
+     "cached": 13.54
+    },
+    "4000": {
+     "nocache": 4.51,
+     "cached": 3.38
+    },
+    "13560": {
+     "nocache": 1.33,
+     "cached": 1.0
+    }
+   }
+  }
+ },
+ "vm_primitives": {
+  "HMAC-SHA-256 (32-B key, 64-B msg)": {
+   "mean_ms": 0.002794004,
+   "sd_ms": 0.0018213220588424294,
+   "median_ms": 0.002666,
+   "reps": 1000
+  },
+  "SHA-256 (64-B msg)": {
+   "mean_ms": 0.000857482,
+   "sd_ms": 0.0006838954515601523,
+   "median_ms": 0.000818,
+   "reps": 1000
+  },
+  "XOR (32 B)": {
+   "mean_ms": 0.002109383,
+   "sd_ms": 0.003424246960070864,
+   "median_ms": 0.0019085,
+   "reps": 1000
+  },
+  "ECDH P-256 (point mult.)": {
+   "mean_ms": 0.05908306,
+   "sd_ms": 0.006989414495820718,
+   "median_ms": 0.056615,
+   "reps": 500
+  }
+ },
+ "vm_protocol": {
+  "delegation": {
+   "CS": {
+    "mean_ms": 0.077531791,
+    "sd_ms": 0.01383587679831304
+   },
+   "MF": {
+    "mean_ms": 0.020709789,
+    "sd_ms": 0.007940655128284149
+   },
+   "ET": {
+    "mean_ms": 0.039366009,
+    "sd_ms": 0.008698632867450016
+   },
+   "SP": {
+    "mean_ms": 0.046401341,
+    "sd_ms": 0.006549239301640241
+   },
+   "total": {
+    "mean_ms": 0.189856301,
+    "sd_ms": 0.02174142169274173
+   }
+  },
+  "access": {
+   "CS": {
+    "mean_ms": 0.0,
+    "sd_ms": 0.0
+   },
+   "MF": {
+    "mean_ms": 0.0,
+    "sd_ms": 0.0
+   },
+   "ET": {
+    "mean_ms": 0.019558784,
+    "sd_ms": 0.00520135009821375
+   },
+   "SP": {
+    "mean_ms": 0.018373741,
+    "sd_ms": 0.005337021132100142
+   },
+   "total": {
+    "mean_ms": 0.040723006,
+    "sd_ms": 0.008286762576541214
+   }
+  },
+  "revocation": {
+   "CS": {
+    "mean_ms": 0.032291759,
+    "sd_ms": 0.017184968949774792
+   },
+   "MF": {
+    "mean_ms": 0.015284468,
+    "sd_ms": 0.010478710821730956
+   },
+   "ET": {
+    "mean_ms": 0.01708183,
+    "sd_ms": 0.009305314842788686
+   },
+   "SP": {
+    "mean_ms": 0.0,
+    "sd_ms": 0.0
+   },
+   "total": {
+    "mean_ms": 0.068728931,
+    "sd_ms": 0.029247158485358995
+   }
+  }
+ },
+ "platform": {
+  "python": "3.12.3",
+  "machine": "x86_64",
+  "processor": "Intel Xeon (Cascade Lake) @ 2.80 GHz, 1 vCPU, KVM",
+  "openssl": "OpenSSL 3.0.13 30 Jan 2024"
+ }
+}

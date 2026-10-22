@@ -1,0 +1,313 @@
+free c: channel.
+
+type key.
+type nonce.
+type ident.
+
+(* identities: honest MF, ET, SP and two registered insiders *)
+free idM, idE, idS, idMbad, idSbad: ident.
+free kMbad, kSbad: key.                       (* insiders: keys known to A *)
+free kM, kE0, kS0: key [private].             (* honest long-term keys     *)
+free pol0: bitstring.                         (* access policy (public)    *)
+
+(* secrets used to test session-key secrecy *)
+free secretET, secretSP, secretAccET, secretAccSP: bitstring [private].
+
+(* domain-separation labels *)
+const lX1, lD1, lD9, lKH, lY4, lD4, lPE, lTE, lPS, lTS, lA1, lA2, lSK,
+      lRAT, lKEV, lRE, lD8, lAA1, lAA2, lASK, lXR, lR0, lREV, lRACK,
+      lR5, lOK, lLeak: bitstring.
+
+(* primitives *)
+fun F(key, bitstring): bitstring.             (* HMAC-SHA-256 (MAC / pad)   *)
+fun kdf(key, bitstring): key.                 (* HMAC output used as a key  *)
+fun mask(bitstring, bitstring): bitstring.
+reduc forall m: bitstring, p: bitstring; unmask(mask(m, p), p) = m.
+fun maskI(ident, bitstring): bitstring.
+reduc forall m: ident, p: bitstring; unmaskI(maskI(m, p), p) = m.
+fun enc(bitstring, key): bitstring.           (* only for secrecy tests     *)
+reduc forall m: bitstring, k: key; dec(enc(m, k), k) = m.
+
+(* registration databases of CS *)
+table mfKeys(ident, key).
+table spKeys(ident, key).
+table etKeys(ident, key).
+table owns(ident, ident).
+table pending(ident, ident, ident, nonce).    (* one-time delegation tickets *)
+
+(* ------------------------------------------------------------- events *)
+event MFrequest(ident, ident, ident, nonce).
+event CSacceptReq(ident, ident, ident, nonce).
+event CSissueET(ident, ident, nonce, nonce, key).
+event ETacceptCS(ident, ident, nonce, nonce, key).
+event CSissueSP(ident, ident, nonce, nonce, key).
+event SPacceptCS(ident, ident, nonce, nonce, key).
+event SPconfirm(ident, ident, nonce, nonce, nonce, key).
+event ETacceptSP(ident, ident, nonce, nonce, nonce, key).
+event ETconfirm(ident, ident, nonce, nonce, nonce, key).
+event SPacceptET(ident, ident, nonce, nonce, nonce, key).
+event SPcommit(ident, nonce).
+event CScompleteET(ident, ident, nonce, nonce).
+event CScompleteSP(ident, ident, nonce).
+event CSconfirmMF(ident, ident, ident, nonce).
+event MFconfirm(ident, ident, ident, nonce).
+event SPaccSend(ident, ident, nonce, nonce, key).
+event ETaccAccept(ident, ident, nonce, nonce, key).
+event ETaccConfirm(ident, ident, nonce, nonce, key).
+event SPaccAccept(ident, ident, nonce, nonce, key).
+event MFrevReq(ident, ident, nonce).
+event CSrevAccept(ident, ident, nonce).
+event CSrevoke(ident, nonce, nonce).
+event ETrevoke(ident, nonce, nonce).
+event ETrevAck(ident, nonce, nonce).
+event CSrevDone(ident, nonce, nonce).
+event CSrevConfirm(ident, ident, nonce).
+event MFrevDone(ident, ident, nonce).
+
+(* ------------------------------------------------------------ queries *)
+(* Q1-Q4: session-key secrecy against an active attacker (phase 0)      *)
+query attacker(secretET).
+query attacker(secretSP).
+query attacker(secretAccET).
+query attacker(secretAccSP).
+(* Q5-Q8: forward secrecy -- secrecy after full state disclosure        *)
+query attacker(secretET) phase 1.
+query attacker(secretSP) phase 1.
+query attacker(secretAccET) phase 1.
+query attacker(secretAccSP) phase 1.
+
+(* Q9: CS accepts a delegation request only if the honest MF issued it  *)
+query xS: ident, xE: ident, ct: nonce;
+  event(CSacceptReq(idM, xS, xE, ct)) ==> event(MFrequest(idM, xS, xE, ct)).
+(* Q10: ET accepts a key package only if CS issued it for this challenge *)
+query xS: ident, nE: nonce, nC: nonce, s: key;
+  inj-event(ETacceptCS(idE, xS, nE, nC, s)) ==> inj-event(CSissueET(idE, xS, nE, nC, s)).
+(* Q11: SP accepts a key package only if CS issued it for this request  *)
+query xE: ident, nS: nonce, nC: nonce, s: key;
+  inj-event(SPacceptCS(idS, xE, nS, nC, s)) ==> inj-event(CSissueSP(idS, xE, nS, nC, s)).
+(* Q12: ET authenticates the honest SP and agrees on SK_0               *)
+query nE: nonce, nC: nonce, nS: nonce, k: key;
+  inj-event(ETacceptSP(idE, idS, nE, nC, nS, k)) ==> inj-event(SPconfirm(idS, idE, nE, nC, nS, k)).
+(* Q13: SP authenticates ET and agrees on SK_0                          *)
+query nE: nonce, nC: nonce, nS: nonce, k: key;
+  inj-event(SPacceptET(idS, idE, nE, nC, nS, k)) ==> inj-event(ETconfirm(idE, idS, nE, nC, nS, k)).
+(* Q14-Q15: CS completes only after ET and SP have committed            *)
+query xS: ident, nE: nonce, nC: nonce, nS: nonce, k: key;
+  inj-event(CScompleteET(idE, xS, nE, nC)) ==> inj-event(ETconfirm(idE, xS, nE, nC, nS, k)).
+query xE: ident, nC: nonce;
+  inj-event(CScompleteSP(idS, xE, nC)) ==> inj-event(SPcommit(idS, nC)).
+(* Q16: MF accepts a confirmation only if CS issued it                  *)
+query xS: ident, xE: ident, ct: nonce;
+  inj-event(MFconfirm(idM, xS, xE, ct)) ==> inj-event(CSconfirmMF(idM, xS, xE, ct)).
+(* Q17-Q18: mutual authentication and key agreement in access sessions  *)
+query mE: nonce, mS: nonce, k: key;
+  inj-event(ETaccAccept(idE, idS, mE, mS, k)) ==> inj-event(SPaccSend(idS, idE, mE, mS, k)).
+query mE: nonce, mS: nonce, k: key;
+  inj-event(SPaccAccept(idS, idE, mE, mS, k)) ==> inj-event(ETaccConfirm(idE, idS, mE, mS, k)).
+(* Q19-Q22: revocation                                                  *)
+query xE: ident, ct: nonce;
+  event(CSrevAccept(idM, xE, ct)) ==> event(MFrevReq(idM, xE, ct)).
+query nE: nonce, nC2: nonce;
+  inj-event(ETrevoke(idE, nE, nC2)) ==> inj-event(CSrevoke(idE, nE, nC2)).
+query nE: nonce, nC2: nonce;
+  inj-event(CSrevDone(idE, nE, nC2)) ==> inj-event(ETrevAck(idE, nE, nC2)).
+query xE: ident, ct: nonce;
+  inj-event(MFrevDone(idM, xE, ct)) ==> inj-event(CSrevConfirm(idM, xE, ct)).
+(* Q23-Q24: sanity (reachability).  Expected answer: false, i.e. the
+   honest executions complete and the events above are not vacuous.     *)
+query mE: nonce, mS: nonce, k: key;
+  event(SPaccAccept(idS, idE, mE, mS, k)).
+query ct: nonce;
+  event(MFrevDone(idM, idE, ct)).
+
+(* ========================================================= processes *)
+
+(* ---------------- Manufacturer: delegation and revocation requests *)
+let MFdeleg =
+  in(c, (xS: ident, xE: ident));                 (* A chooses the delegate *)
+  new ct: nonce;                                 (* strictly increasing counter *)
+  new tM: nonce;                                 (* timestamp *)
+  let X = mask((xS, xE, pol0), F(kM, (lX1, idM, ct))) in
+  let a1 = F(kM, (lD1, idM, ct, tM, X)) in
+  event MFrequest(idM, xS, xE, ct);
+  out(c, (idM, ct, tM, X, a1));
+  in(c, (=ct, st: bitstring, a2: bitstring));
+  if a2 = F(kM, (lD9, idM, ct, st)) then
+  event MFconfirm(idM, xS, xE, ct).
+
+let MFrev =
+  in(c, xE: ident);
+  new ct: nonce;
+  new tM: nonce;
+  let X = maskI(xE, F(kM, (lXR, idM, ct))) in
+  event MFrevReq(idM, xE, ct);
+  out(c, (idM, ct, tM, X, F(kM, (lR0, idM, ct, tM, X))));
+  in(c, (=ct, st: bitstring, a3: bitstring));
+  if a3 = F(kM, (lR5, idM, ct, st)) then
+  event MFrevDone(idM, xE, ct).
+
+(* ---------------- Cloud Server *)
+let CSreq =
+  in(c, (xM: ident, xct: nonce, xT: nonce, xX: bitstring, xa1: bitstring));
+  get mfKeys(=xM, kMx: key) in
+  if xa1 = F(kMx, (lD1, xM, xct, xT, xX)) then
+  let (yS: ident, yE: ident, =pol0) = unmask(xX, F(kMx, (lX1, xM, xct))) in
+  get owns(=xM, =yE) in
+  event CSacceptReq(xM, yS, yE, xct);
+  insert pending(xM, yS, yE, xct).
+
+let CSdeleg =
+  in(c, (xS: ident, xnS: nonce, xnE: nonce, xkh: bitstring, xY: bitstring, xb1: bitstring));
+  get spKeys(=xS, kSx: key) in
+  if xb1 = F(kSx, (lD4, xS, xnS, xnE, xkh, xY)) then
+  let yE = unmaskI(xY, F(kSx, (lY4, xnS))) in
+  get pending(xM: ident, =xS, =yE, xct: nonce) in
+  get etKeys(=yE, kEx: key) in
+  if xkh = F(kEx, (lKH, xnE)) then
+  new nC: nonce;
+  new s: key;
+  let EE = mask((s, xS, pol0), F(kEx, (lPE, xnE, nC))) in
+  let tauE = F(kEx, (lTE, xnE, nC, EE)) in
+  let ES = mask((s, pol0), F(kSx, (lPS, xnS, nC))) in
+  let tauS = F(kSx, (lTS, yE, xnS, nC, ES)) in
+  event CSissueET(yE, xS, xnE, nC, s);
+  event CSissueSP(xS, yE, xnS, nC, s);
+  out(c, (nC, ES, tauS, EE, tauE));
+  in(c, (=nC, xrho: bitstring, xb2: bitstring));
+  if xrho = F(kdf(kEx, lKEV), (lRE, xnE, nC)) then
+  event CScompleteET(yE, xS, xnE, nC);
+  if xb2 = F(kdf(kSx, lKEV), (lD8, nC, xrho)) then
+  event CScompleteSP(xS, yE, nC);
+  get mfKeys(=xM, kMy: key) in
+  event CSconfirmMF(xM, xS, yE, xct);
+  out(c, (xct, lOK, F(kMy, (lD9, xM, xct, lOK)))).
+
+let CSrevoke =
+  in(c, (xM: ident, xct: nonce, xT: nonce, xX: bitstring, xa: bitstring));
+  get mfKeys(=xM, kMx: key) in
+  if xa = F(kMx, (lR0, xM, xct, xT, xX)) then
+  let yE = unmaskI(xX, F(kMx, (lXR, xM, xct))) in
+  get owns(=xM, =yE) in
+  event CSrevAccept(xM, yE, xct);
+  get etKeys(=yE, kEx: key) in
+  in(c, (xnE: nonce, xkh: bitstring));               (* R2 relayed by a reader *)
+  if xkh = F(kEx, (lKH, xnE)) then
+  new nC2: nonce;
+  event CSrevoke(yE, xnE, nC2);
+  out(c, (nC2, F(kEx, (lREV, xnE, nC2))));           (* R3 *)
+  in(c, xRack: bitstring);                           (* R4 *)
+  if xRack = F(kdf(kEx, lKEV), (lRACK, xnE, nC2)) then
+  event CSrevDone(yE, xnE, nC2);
+  event CSrevConfirm(xM, yE, xct);
+  out(c, (xct, lOK, F(kMx, (lR5, xM, xct, lOK)))).   (* R5 *)
+
+(* ---------------- E-tag *)
+(* After the delegation the attacker either (i) corrupts the tag right away
+   (it then holds kE1 and s1) or (ii) lets one access session run first
+   (the tag then holds kE1 and s2).  The choice br is the first input of the
+   session so that ProVerif does not merge sessions taking different branches. *)
+let ETafter(br: bitstring, kE1: key, s1: key, yS: ident) =
+  if br = lLeak then (phase 1; out(c, (kE1, s1)))
+  else (
+    in(c, q2: bitstring);                            (* A1: reader query *)
+    new mE: nonce;
+    out(c, (mE, F(s1, (lKH, mE))));                  (* A2 *)
+    in(c, (xmS: nonce, xasig1: bitstring));          (* A3 *)
+    if xasig1 = F(s1, (lAA1, mE, xmS)) then
+    let ASK = kdf(s1, (lASK, xmS, mE)) in
+    event ETaccAccept(idE, yS, mE, xmS, ASK);
+    let s2 = kdf(s1, lRAT) in
+    event ETaccConfirm(idE, yS, mE, xmS, ASK);
+    out(c, F(s1, (lAA2, xmS, mE)));                  (* A4 *)
+    if yS = idS then (out(c, enc(secretAccET, ASK)); phase 1; out(c, (kE1, s2)))
+    else (phase 1; out(c, (kE1, s2)))
+  ).
+
+let ETdeleg =
+  in(c, br: bitstring);                              (* M2: reader query *)
+  new nE: nonce;
+  out(c, (nE, F(kE0, (lKH, nE))));                   (* M3 *)
+  in(c, (xnC: nonce, xEE: bitstring, xtauE: bitstring, xnS: nonce, xsig1: bitstring));
+  if xtauE = F(kE0, (lTE, nE, xnC, xEE)) then
+  let (ys: key, yS: ident, =pol0) = unmask(xEE, F(kE0, (lPE, nE, xnC))) in
+  event ETacceptCS(idE, yS, nE, xnC, ys);
+  if xsig1 = F(ys, (lA1, nE, xnC, xnS)) then
+  let SK = kdf(ys, (lSK, xnS, nE, xnC)) in
+  event ETacceptSP(idE, yS, nE, xnC, xnS, SK);
+  let kE1 = kdf(kE0, lKEV) in
+  let s1 = kdf(ys, lRAT) in
+  event ETconfirm(idE, yS, nE, xnC, xnS, SK);
+  out(c, (F(ys, (lA2, xnS, nE, xnC)), F(kE1, (lRE, nE, xnC))));   (* M7 *)
+  if yS = idS then (out(c, enc(secretET, SK)); ETafter(br, kE1, s1, yS))
+  else ETafter(br, kE1, s1, yS).
+
+let ETrev =
+  in(c, q: bitstring);                               (* R1 *)
+  new nE: nonce;
+  out(c, (nE, F(kE0, (lKH, nE))));                   (* R2 *)
+  in(c, (xnC2: nonce, xRTag: bitstring));            (* R3 *)
+  if xRTag = F(kE0, (lREV, nE, xnC2)) then
+  event ETrevoke(idE, nE, xnC2);
+  let kE1 = kdf(kE0, lKEV) in
+  event ETrevAck(idE, nE, xnC2);
+  out(c, F(kE1, (lRACK, nE, xnC2))).                 (* R4 *)
+
+(* ---------------- Supplier *)
+let SPafter(br: bitstring, kS1: key, s1: key, xE: ident) =
+  if br = lLeak then (phase 1; out(c, (kS1, s1)))
+  else (
+    out(c, lOK);                                     (* A1 *)
+    in(c, (ymE: nonce, ykh: bitstring));             (* A2 *)
+    if ykh = F(s1, (lKH, ymE)) then
+    new mS: nonce;
+    let ASK = kdf(s1, (lASK, mS, ymE)) in
+    event SPaccSend(idS, xE, ymE, mS, ASK);
+    out(c, (mS, F(s1, (lAA1, ymE, mS))));            (* A3 *)
+    in(c, xasig2: bitstring);                        (* A4 *)
+    if xasig2 = F(s1, (lAA2, mS, ymE)) then
+    event SPaccAccept(idS, xE, ymE, mS, ASK);
+    let s2 = kdf(s1, lRAT) in
+    if xE = idE then (out(c, enc(secretAccSP, ASK)); phase 1; out(c, (kS1, s2)))
+    else (phase 1; out(c, (kS1, s2)))
+  ).
+
+let SP =
+  in(c, (br: bitstring, xE: ident));                 (* A picks branch and target tag *)
+  out(c, lOK);                                       (* M2 *)
+  in(c, (xnE: nonce, xkh: bitstring));               (* M3 *)
+  new nS: nonce;
+  let Y = maskI(xE, F(kS0, (lY4, nS))) in
+  out(c, (idS, nS, xnE, xkh, Y, F(kS0, (lD4, idS, nS, xnE, xkh, Y))));   (* M4 *)
+  in(c, (xnC: nonce, xES: bitstring, xtauS: bitstring, xEE: bitstring, xtauE: bitstring));
+  if xtauS = F(kS0, (lTS, xE, nS, xnC, xES)) then
+  let (ys: key, =pol0) = unmask(xES, F(kS0, (lPS, nS, xnC))) in
+  event SPacceptCS(idS, xE, nS, xnC, ys);
+  let kS1 = kdf(kS0, lKEV) in
+  let SK = kdf(ys, (lSK, nS, xnE, xnC)) in
+  event SPconfirm(idS, xE, xnE, xnC, nS, SK);
+  out(c, (xnC, xEE, xtauE, nS, F(ys, (lA1, xnE, xnC, nS))));             (* M6 *)
+  in(c, (xsig2: bitstring, xrho: bitstring));                            (* M7 *)
+  if xsig2 = F(ys, (lA2, nS, xnE, xnC)) then
+  event SPacceptET(idS, xE, xnE, xnC, nS, SK);
+  let s1 = kdf(ys, lRAT) in
+  event SPcommit(idS, xnC);
+  out(c, (xnC, xrho, F(kS1, (lD8, xnC, xrho))));                         (* M8 *)
+  if xE = idE then (out(c, enc(secretSP, SK)); SPafter(br, kS1, s1, xE))
+  else SPafter(br, kS1, s1, xE).
+
+(* ---------------- System *)
+process
+  insert mfKeys(idM, kM);
+  insert mfKeys(idMbad, kMbad);
+  insert owns(idM, idE);
+  insert etKeys(idE, kE0);
+  insert spKeys(idS, kS0);
+  insert spKeys(idSbad, kSbad);
+  (
+      (!MFdeleg) | (!MFrev)
+    | (!CSreq) | (!CSdeleg) | (!CSrevoke)
+    | (!ETdeleg) | (!ETrev)
+    | (!SP)
+    (* phase 1: CS database and MF key after completed sessions *)
+    | (phase 1; out(c, (kM, kdf(kE0, lKEV), kdf(kS0, lKEV))))
+  )

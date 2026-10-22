@@ -1,0 +1,230 @@
+[
+ {
+  "test": "T1 honest delegation + 5 access sessions agree on keys",
+  "expected": "agree",
+  "observed": "agree",
+  "passed": true
+ },
+ {
+  "test": "T2a replay of M1 (same counter) to CS",
+  "expected": "rejected",
+  "observed": "rejected",
+  "passed": true
+ },
+ {
+  "test": "T2b delayed M1 outside the 30 s window",
+  "expected": "rejected",
+  "observed": "rejected",
+  "passed": true
+ },
+ {
+  "test": "T2c replay of M4 after ticket consumption",
+  "expected": "rejected",
+  "observed": "rejected",
+  "passed": true
+ },
+ {
+  "test": "T2d replay of M5 to SP",
+  "expected": "rejected",
+  "observed": "rejected",
+  "passed": true
+ },
+ {
+  "test": "T2e replay of M6 to ET (challenge consumed)",
+  "expected": "rejected",
+  "observed": "rejected",
+  "passed": true
+ },
+ {
+  "test": "T2f replay of M6 to ET after a new challenge",
+  "expected": "rejected",
+  "observed": "rejected",
+  "passed": true
+ },
+ {
+  "test": "T2g replay of M8 to CS",
+  "expected": "rejected",
+  "observed": "rejected",
+  "passed": true
+ },
+ {
+  "test": "T2h replay of access message A3 to ET",
+  "expected": "rejected",
+  "observed": "rejected",
+  "passed": true
+ },
+ {
+  "test": "T3a access after revocation",
+  "expected": "rejected",
+  "observed": "rejected",
+  "passed": true
+ },
+ {
+  "test": "T3b replay of pre-revocation M6 (re-grant attempt)",
+  "expected": "rejected",
+  "observed": "rejected",
+  "passed": true
+ },
+ {
+  "test": "T3c replay of RTag (R3) to ET",
+  "expected": "rejected",
+  "observed": "rejected",
+  "passed": true
+ },
+ {
+  "test": "T3d new delegation after revocation succeeds",
+  "expected": "accepted",
+  "observed": "accepted",
+  "passed": true
+ },
+ {
+  "test": "T4a registered SP' requests key package without ticket",
+  "expected": "rejected",
+  "observed": "rejected",
+  "passed": true
+ },
+ {
+  "test": "T4b SP' forwards E_E with its own sigma1",
+  "expected": "rejected",
+  "observed": "rejected",
+  "passed": true
+ },
+ {
+  "test": "T4c MF' (not owner) delegates the tag",
+  "expected": "rejected",
+  "observed": "rejected",
+  "passed": true
+ },
+ {
+  "test": "T5 access beyond budget N_max = 3",
+  "expected": "rejected",
+  "observed": "rejected",
+  "passed": true
+ },
+ {
+  "test": "T6a previous supplier after handover",
+  "expected": "rejected",
+  "observed": "rejected",
+  "passed": true
+ },
+ {
+  "test": "T6b new supplier after handover",
+  "expected": "accepted",
+  "observed": "accepted",
+  "passed": true
+ },
+ {
+  "test": "T7a post-session keys (ET, SP, CS) open the recorded key package",
+  "expected": "no",
+  "observed": "no",
+  "passed": true
+ },
+ {
+  "test": "T7b CS retains delegation secret after M8",
+  "expected": "no",
+  "observed": "no",
+  "passed": true
+ },
+ {
+  "test": "T8 drop M3 during delegation, then recover",
+  "expected": "recovered",
+  "observed": "recovered",
+  "passed": true
+ },
+ {
+  "test": "T8 drop M4 during delegation, then recover",
+  "expected": "recovered",
+  "observed": "recovered",
+  "passed": true
+ },
+ {
+  "test": "T8 drop M5 during delegation, then recover",
+  "expected": "recovered",
+  "observed": "recovered",
+  "passed": true
+ },
+ {
+  "test": "T8 drop M6 during delegation, then recover",
+  "expected": "recovered",
+  "observed": "recovered",
+  "passed": true
+ },
+ {
+  "test": "T8 drop M7 during delegation, then recover",
+  "expected": "recovered",
+  "observed": "recovered",
+  "passed": true
+ },
+ {
+  "test": "T8 drop M8 during delegation, then recover",
+  "expected": "recovered",
+  "observed": "recovered",
+  "passed": true
+ },
+ {
+  "test": "T8 drop M9 during delegation, then recover",
+  "expected": "recovered",
+  "observed": "recovered",
+  "passed": true
+ },
+ {
+  "test": "T8 M7 lost: SP resumes access without re-delegation",
+  "expected": "accepted",
+  "observed": "accepted",
+  "passed": true
+ },
+ {
+  "test": "T8 drop A2 during access, then recover",
+  "expected": "recovered",
+  "observed": "recovered",
+  "passed": true
+ },
+ {
+  "test": "T8 drop A3 during access, then recover",
+  "expected": "recovered",
+  "observed": "recovered",
+  "passed": true
+ },
+ {
+  "test": "T8 drop A4 during access, then recover",
+  "expected": "recovered",
+  "observed": "recovered",
+  "passed": true
+ },
+ {
+  "test": "T8 drop R2 during revocation, then recover",
+  "expected": "recovered",
+  "observed": "recovered",
+  "passed": true
+ },
+ {
+  "test": "T8 drop R3 during revocation, then recover",
+  "expected": "recovered",
+  "observed": "recovered",
+  "passed": true
+ },
+ {
+  "test": "T8 drop R4 during revocation, then recover",
+  "expected": "recovered",
+  "observed": "recovered",
+  "passed": true
+ },
+ {
+  "test": "T9a randomised schedules (10000): invariant violations",
+  "expected": "0",
+  "observed": "0",
+  "passed": true
+ },
+ {
+  "test": "T9b randomised schedules (10000): replayed message accepted",
+  "expected": "0",
+  "observed": "0",
+  "passed": true
+ },
+ {
+  "test": "T9c randomised schedules (10000): parties unable to recover",
+  "expected": "0",
+  "observed": "0",
+  "passed": true
+ }
+]
